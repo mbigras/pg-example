@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Bring up docker container, create a table, insert some things
+
+db=pgexampledb
+
+docker rm -f $db &> /dev/null
+docker run -itd --name $db -p 5432:5432 postgres:10
+
+sleep 3 # wait for postgres to start
+
+docker exec -u postgres $db psql -c "
+	CREATE TABLE things (
+		id serial PRIMARY KEY,
+		name varchar (50) NOT NULL
+	);
+
+	INSERT INTO things (name) VALUES ('foo');
+	INSERT INTO things (name) VALUES ('bar');
+	INSERT INTO things (name) VALUES ('baz');
+"
+
+docker exec -u postgres $db psql -c 'SELECT * FROM things;'
